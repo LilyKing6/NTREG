@@ -1,0 +1,56 @@
+;
+; hivesys.inf - SYSTEM hive initialization
+;
+
+[Version]
+Signature = "$NT Registry$"
+
+[AddReg]
+; CurrentVersion
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","ProductName",0x00000000,"NTSoft Registry"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","CurrentVersion",0x00000000,"1.0"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","CurrentBuild",0x00000000,"146"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","BuildLab",0x00000000,"146.ntreg.250501"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","InstallDate",0x00010001,0x00000000
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","RegisteredOwner",0x00000000,"User"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","RegisteredOrganization",0x00000000,""
+
+; Control
+HKLM,"SYSTEM\CurrentControlSet\Control",,0x00000012
+HKLM,"SYSTEM\CurrentControlSet\Control\FileSystem",,0x00000012
+HKLM,"SYSTEM\CurrentControlSet\Control\FileSystem","NtfsDisableLastAccessUpdate",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Control\Nls",,0x00000012
+HKLM,"SYSTEM\CurrentControlSet\Control\Nls\CodePage","ACP",0x00000000,"1252"
+HKLM,"SYSTEM\CurrentControlSet\Control\Nls\CodePage","OEMCP",0x00000000,"437"
+HKLM,"SYSTEM\CurrentControlSet\Control\Nls\Language","Default",0x00000000,"0409"
+HKLM,"SYSTEM\CurrentControlSet\Control\Session Manager",,0x00000012
+HKLM,"SYSTEM\CurrentControlSet\Control\Session Manager\Environment","TEMP",0x00020000,"%SystemRoot%\TEMP"
+HKLM,"SYSTEM\CurrentControlSet\Control\Session Manager\Environment","TMP",0x00020000,"%SystemRoot%\TEMP"
+HKLM,"SYSTEM\CurrentControlSet\Control\Session Manager\Environment","windir",0x00000000,"%SystemRoot%"
+HKLM,"SYSTEM\CurrentControlSet\Control\TimeZoneInformation","StandardName",0x00000000,"UTC"
+HKLM,"SYSTEM\CurrentControlSet\Control\TimeZoneInformation","Bias",0x00010001,0x00000000
+
+; Services
+HKLM,"SYSTEM\CurrentControlSet\Services",,0x00000012
+HKLM,"SYSTEM\CurrentControlSet\Services\ACPI","Start",0x00010001,0x00000000
+HKLM,"SYSTEM\CurrentControlSet\Services\ACPI","Type",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\ACPI","ErrorControl",0x00010001,0x00000003
+HKLM,"SYSTEM\CurrentControlSet\Services\ACPI","Group",0x00000000,"Boot Bus Extender"
+HKLM,"SYSTEM\CurrentControlSet\Services\Disk","Start",0x00010001,0x00000000
+HKLM,"SYSTEM\CurrentControlSet\Services\Disk","Type",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\Disk","ErrorControl",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\Disk","Group",0x00000000,"SCSI Class"
+HKLM,"SYSTEM\CurrentControlSet\Services\pci","Start",0x00010001,0x00000000
+HKLM,"SYSTEM\CurrentControlSet\Services\pci","Type",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\pci","ErrorControl",0x00010001,0x00000003
+HKLM,"SYSTEM\CurrentControlSet\Services\pci","Group",0x00000000,"Boot Bus Extender"
+
+; Device database
+HKLM,"SYSTEM\CurrentControlSet\Control\CriticalDeviceDatabase\*PNP0A03","Service",0x00000000,"pci"
+HKLM,"SYSTEM\CurrentControlSet\Control\CriticalDeviceDatabase\*PNP0A03","ClassGUID",0x00000000,"{4D36E97D-E325-11CE-BFC1-08002BE10318}"
+
+; Select
+HKLM,"SYSTEM\Select","Current",0x00010001,0x00000001
+HKLM,"SYSTEM\Select","Default",0x00010001,0x00000001
+HKLM,"SYSTEM\Select","Failed",0x00010001,0x00000000
+HKLM,"SYSTEM\Select","LastKnownGood",0x00010001,0x00000001

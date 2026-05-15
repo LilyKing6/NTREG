@@ -1,0 +1,1 @@
+del *.o *.lib /s /q

@@ -1,0 +1,57 @@
+;
+; hivedef.inf - DEFAULT user hive initialization
+;
+
+[Version]
+Signature = "$NT Registry$"
+
+[AddReg]
+; Control Panel
+HKCU,"Control Panel",,0x00000012
+HKCU,"Control Panel\Desktop","Wallpaper",0x00000000,""
+HKCU,"Control Panel\Desktop","ScreenSaveActive",0x00000000,"0"
+HKCU,"Control Panel\Desktop","WallpaperStyle",0x00000000,"0"
+HKCU,"Control Panel\Desktop","Pattern",0x00000000,"(None)"
+HKCU,"Control Panel\Desktop\Colors","Background",0x00000000,"0 0 0"
+HKCU,"Control Panel\Desktop\Colors","WindowText",0x00000000,"0 0 0"
+HKCU,"Control Panel\Desktop\Colors","Window",0x00000000,"255 255 255"
+
+; Mouse
+HKCU,"Control Panel\Mouse","DoubleClickSpeed",0x00000000,"500"
+HKCU,"Control Panel\Mouse","MouseSpeed",0x00000000,"0"
+HKCU,"Control Panel\Mouse","SwapMouseButtons",0x00000000,"0"
+
+; Keyboard
+HKCU,"Control Panel\Keyboard","KeyboardDelay",0x00000000,"1"
+HKCU,"Control Panel\Keyboard","KeyboardSpeed",0x00000000,"31"
+HKCU,"Control Panel\Keyboard","InitialKeyboardIndicators",0x00000000,"0"
+
+; Sound
+HKCU,"Control Panel\Sound","Beep",0x00000000,"yes"
+
+; Accessibility
+HKCU,"Control Panel\Accessibility",,0x00000012
+HKCU,"Control Panel\Accessibility\StickyKeys","Flags",0x00000000,"510"
+HKCU,"Control Panel\Accessibility\ToggleKeys","Flags",0x00000000,"58"
+
+; Desktop appearance
+HKCU,"Control Panel\Appearance",,0x00000012
+HKCU,"Control Panel\Appearance\Schemes","Default",0x00000000,""
+
+; Environment
+HKCU,"Environment","TEMP",0x00020000,"%USERPROFILE%\Local Settings\Temp"
+HKCU,"Environment","TMP",0x00020000,"%USERPROFILE%\Local Settings\Temp"
+
+; Software
+HKCU,"Software",,0x00000012
+HKCU,"Software\NTSoft",,0x00000012
+
+; Network
+HKCU,"Network",,0x00000012
+
+; Printers
+HKCU,"Printers",,0x00000012
+
+; Identities
+HKCU,"Identities","Last Username",0x00000000,"Default User"
+HKCU,"Identities","Last User ID",0x00000000,"{00000000-0000-0000-0000-000000000000}"

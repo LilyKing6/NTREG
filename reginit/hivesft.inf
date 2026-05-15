@@ -1,0 +1,54 @@
+;
+; hivesft.inf - SOFTWARE hive initialization
+;
+
+[Version]
+Signature = "$NT Registry$"
+
+[AddReg]
+; Classes root
+HKLM,"SOFTWARE\Classes",,0x00000012
+
+; File associations
+HKCR,".txt","",0x00000000,"txtfile"
+HKCR,".log","",0x00000000,"txtfile"
+HKCR,".ini","",0x00000000,"inifile"
+HKCR,".inf","",0x00000000,"inffile"
+HKCR,".bat","",0x00000000,"batfile"
+HKCR,".cmd","",0x00000000,"cmdfile"
+HKCR,".reg","",0x00000000,"regfile"
+HKCR,"txtfile","",0x00000000,"Text Document"
+HKCR,"inifile","",0x00000000,"Configuration Settings"
+HKCR,"inffile","",0x00000000,"Setup Information"
+HKCR,"batfile","",0x00000000,"Windows Batch File"
+HKCR,"cmdfile","",0x00000000,"Windows Command Script"
+HKCR,"regfile","",0x00000000,"Registration Entries"
+
+; NTSoft version
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","CurrentVersion",0x00000000,"1.0"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","CurrentBuildNumber",0x00000000,"146"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","ProductName",0x00000000,"NTSoft Registry"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","SystemRoot",0x00000000,"%SystemRoot%"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","DevicePath",0x00020000,"%SystemRoot%\inf"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","RegisteredOwner",0x00000000,"User"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion","InstallationType",0x00000000,"Registry Library"
+
+; Environment
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion\Fonts","Arial (TrueType)",0x00000000,"arial.ttf"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion\Fonts","Courier New (TrueType)",0x00000000,"cour.ttf"
+HKLM,"SOFTWARE\NTSoft\Windows NT\CurrentVersion\Fonts","Times New Roman (TrueType)",0x00000000,"times.ttf"
+
+; App paths
+HKLM,"SOFTWARE\NTSoft\Windows\CurrentVersion\App Paths\regedit.exe","",0x00020000,"%SystemRoot%\regedit.exe"
+
+; OLE
+HKLM,"SOFTWARE\Classes\CLSID",,0x00000012
+HKLM,"SOFTWARE\Classes\Interface",,0x00000012
+HKLM,"SOFTWARE\Classes\TypeLib",,0x00000012
+
+; Run/RunOnce
+HKLM,"SOFTWARE\NTSoft\Windows\CurrentVersion\Run",,0x00000012
+HKLM,"SOFTWARE\NTSoft\Windows\CurrentVersion\RunOnce",,0x00000012
+
+; Uninstall
+HKLM,"SOFTWARE\NTSoft\Windows\CurrentVersion\Uninstall",,0x00000012

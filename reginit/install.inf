@@ -1,0 +1,13 @@
+; Do not edit - Machine generated 
+[Version]
+Signature = "$NT Registry$"
+
+[AddReg]
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","ProductName",2,"NTSoft Registry Code Name LOONG"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","CurrentVersion",2,"1.0"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","CurrentBuild",2,"146"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","CurrentBuildNumber",2,"146"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","BuildLab",2,"146.loong_m5.240713-943"
+HKLM,"SYSTEM\NTSoft\NTREG\CurrentVersion","BuildLabEx",2,"1.0.146.0.win32.loong_m5.240713-943"
+
+; end

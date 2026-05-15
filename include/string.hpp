@@ -1,0 +1,177 @@
+/*
+ * PROJECT:   Registry Library
+ * LICENSE:   See LICENSE in the top level directory
+ * COPYRIGHT: Copyright 2024
+ * FILE:      string.hpp
+ * PURPOSE:   Modern C++20 string utilities for registry operations
+ */
+
+#pragma once
+
+#include <string>
+#include <string_view>
+#include <algorithm>
+#include <cctype>
+#include <cwctype>
+#include "types.hpp"
+
+namespace registry {
+
+// Modern replacement for UNICODE_STRING with automatic memory management
+class RegistryString {
+private:
+    std::wstring data_;
+
+public:
+    // Constructors
+    constexpr RegistryString() noexcept = default;
+
+    RegistryString(const wchar_t* str) : data_(str ? str : L"") {}
+
+    RegistryString(std::wstring_view sv) : data_(sv) {}
+
+    RegistryString(const std::wstring& str) : data_(str) {}
+
+    RegistryString(std::wstring&& str) noexcept : data_(std::move(str)) {}
+
+    // Accessors
+    [[nodiscard]] constexpr std::wstring_view view() const noexcept {
+        return data_;
+    }
+
+    [[nodiscard]] constexpr const wchar_t* c_str() const noexcept {
+        return data_.c_str();
+    }
+
+    [[nodiscard]] constexpr const wchar_t* data() const noexcept {
+        return data_.data();
+    }
+
+    [[nodiscard]] constexpr usize size() const noexcept {
+        return data_.size();
+    }
+
+    [[nodiscard]] constexpr usize length() const noexcept {
+        return data_.length();
+    }
+
+    [[nodiscard]] constexpr bool empty() const noexcept {
+        return data_.empty();
+    }
+
+    // Modifiers
+    void clear() noexcept {
+        data_.clear();
+    }
+
+    void reserve(usize capacity) {
+        data_.reserve(capacity);
+    }
+
+    // Comparison (case-insensitive for registry keys)
+    [[nodiscard]] i32 compare_insensitive(std::wstring_view other) const noexcept {
+        const auto len = std::min(data_.size(), other.size());
+
+        for (usize i = 0; i < len; ++i) {
+            const auto c1 = ::towupper(data_[i]);
+            const auto c2 = ::towupper(other[i]);
+            if (c1 != c2) {
+                return static_cast<i32>(c1 - c2);
+            }
+        }
+
+        return static_cast<i32>(data_.size() - other.size());
+    }
+
+    [[nodiscard]] bool equals_insensitive(std::wstring_view other) const noexcept {
+        if (data_.size() != other.size()) {
+            return false;
+        }
+
+        return std::equal(data_.begin(), data_.end(), other.begin(),
+            [](wchar_t a, wchar_t b) {
+                return ::towupper(a) == ::towupper(b);
+            });
+    }
+
+    // Conversion operators
+    [[nodiscard]] operator std::wstring_view() const noexcept {
+        return data_;
+    }
+
+    [[nodiscard]] const std::wstring& str() const noexcept {
+        return data_;
+    }
+
+    // Comparison operators
+    [[nodiscard]] auto operator<=>(const RegistryString& other) const noexcept = default;
+
+    // String operations
+    [[nodiscard]] bool starts_with(std::wstring_view prefix) const noexcept {
+        return data_.starts_with(prefix);
+    }
+
+    [[nodiscard]] bool ends_with(std::wstring_view suffix) const noexcept {
+        return data_.ends_with(suffix);
+    }
+
+    [[nodiscard]] bool contains(std::wstring_view substr) const noexcept {
+        return data_.find(substr) != std::wstring::npos;
+    }
+};
+
+// String utilities
+namespace string_utils {
+
+// Case-insensitive comparison
+[[nodiscard]] inline i32 compare_insensitive(std::wstring_view a, std::wstring_view b) noexcept {
+    const auto len = std::min(a.size(), b.size());
+
+    for (usize i = 0; i < len; ++i) {
+        const auto c1 = ::towupper(a[i]);
+        const auto c2 = ::towupper(b[i]);
+        if (c1 != c2) {
+            return static_cast<i32>(c1 - c2);
+        }
+    }
+
+    return static_cast<i32>(a.size() - b.size());
+}
+
+// Case-insensitive equality
+[[nodiscard]] inline bool equals_insensitive(std::wstring_view a, std::wstring_view b) noexcept {
+    if (a.size() != b.size()) {
+        return false;
+    }
+
+    return std::equal(a.begin(), a.end(), b.begin(),
+        [](wchar_t c1, wchar_t c2) {
+            return ::towupper(c1) == ::towupper(c2);
+        });
+}
+
+// Convert to uppercase
+[[nodiscard]] inline std::wstring to_upper(std::wstring_view str) {
+    std::wstring result;
+    result.reserve(str.size());
+
+    std::transform(str.begin(), str.end(), std::back_inserter(result),
+        [](wchar_t c) { return ::towupper(c); });
+
+    return result;
+}
+
+// Convert to lowercase
+[[nodiscard]] inline std::wstring to_lower(std::wstring_view str) {
+    std::wstring result;
+    result.reserve(str.size());
+
+    std::transform(str.begin(), str.end(), std::back_inserter(result),
+        [](wchar_t c) { return ::towlower(c); });
+
+    return result;
+}
+
+} // namespace string_utils
+
+} // namespace registry

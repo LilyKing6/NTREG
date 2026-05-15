@@ -1,0 +1,29 @@
+# Build
+build/
+*.o
+*.obj
+*.lib
+*.a
+
+# Binaries
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.exp
+
+# IDE
+.vs/
+*.user
+*.suo
+*.sln
+*.vcxproj*
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE / tool directories
+.vscode/
+.claude/
