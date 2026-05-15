@@ -1,6 +1,6 @@
 # NTREG
 
-Windows Registry Hive 实现库 — 在用户态创建、读取和操作 Windows 注册表 Hive 文件。
+模仿 Windows 注册表机制实现的类注册表数据库 — 提供类似 Windows 注册表的键值树状存储结构。
 
 ## 功能特性
 

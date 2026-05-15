@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NTREG is a Windows Registry hive implementation library that provides low-level registry operations. The codebase implements the Windows Registry hive format, allowing creation, reading, and manipulation of registry hives outside of Windows kernel context.
+NTREG 模仿 Windows 注册表机制，实现了一个类注册表的键值树状数据库。项目复用了 Windows 注册表的 Hive 二进制格式和内部数据结构，但作为一个独立的数据库运行，不依赖 Windows 内核。
 
 ## Build Commands
 
