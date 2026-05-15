@@ -173,4 +173,4 @@ cd build && ./mkhive.exe -h:SYSTEM,SOFTWARE,DEFAULT -d:output reginit/hivesys.in
 
 ## Pending Tasks
 
-1. **Git 初始化 + 发布准备** — 推送到 GitHub，设置 .gitignore、README、CI.
+_None — all tasks completed._
