@@ -120,15 +120,16 @@ NTRegSetValueExW(
 {
     PMEMKEY Key = REGHKEY_TO_MEMKEY(hKey);
     PHHIVE Hive;
-    PCM_KEY_NODE KeyNode;
-    PCM_KEY_VALUE ValueCell;
+    PCM_KEY_NODE KeyNode = nullptr;
+    PCM_KEY_VALUE ValueCell = nullptr;
     ULONG ChildIndex;
-    HCELL_INDEX CellIndex;
+    HCELL_INDEX CellIndex = HCELL_NIL;
     UNICODE_STRING ValueNameString;
+    HCELL_INDEX NewOffset = HCELL_NIL;  // for allocated data cell
 
-    void* DataCell;
-    ULONG DataCellSize;
-    int Status;
+    void* DataCell = nullptr;
+    ULONG DataCellSize = 0;
+    LONG rc = ERROR_GEN_FAILURE;  // assume failure
 
     if (dwType == REG_LINK)
     {
@@ -158,7 +159,8 @@ NTRegSetValueExW(
     if (!KeyNode)
         return ERROR_GEN_FAILURE;
 
-    ASSERT(KeyNode->Signature == CM_KEY_NODE_SIGNATURE);
+    if (KeyNode->Signature != CM_KEY_NODE_SIGNATURE)
+        goto Quit;
 
     HvMarkCellDirty(Hive, Key->KeyCellOffset, FALSE);
 
@@ -170,39 +172,41 @@ NTRegSetValueExW(
                            &CellIndex))
     {
         ASSERT(CellIndex == HCELL_NIL);
-        Status = STATUS_INSUFFICIENT_RESOURCES;
+        // Not found; will create new
     }
+
     if (CellIndex == HCELL_NIL)
     {
-        Status = CmiAddValueKey(Key->RegistryHive,
-                                KeyNode,
-                                ChildIndex,
-                                &ValueNameString,
-                                &ValueCell,
-                                &CellIndex);
+        int Status = CmiAddValueKey(Key->RegistryHive,
+                                    KeyNode,
+                                    ChildIndex,
+                                    &ValueNameString,
+                                    &ValueCell,
+                                    &CellIndex);
+        if (!NT_SUCCESS(Status) || !ValueCell)
+            goto Quit;
     }
     else
     {
-        ValueCell = reinterpret_cast<PCM_KEY_VALUE>(HvGetCell(&Key->RegistryHive->Hive, CellIndex));
-        ASSERT(ValueCell != NULL);
-        Status = STATUS_SUCCESS;
+        ValueCell = reinterpret_cast<PCM_KEY_VALUE>(HvGetCell(Hive, CellIndex));
+        if (!ValueCell)
+            goto Quit;
+        if (ValueCell->Signature != CM_KEY_VALUE_SIGNATURE)
+            goto Quit;
     }
 
-    if (!NT_SUCCESS(Status))
-        return ERROR_GEN_FAILURE;
-
+    // Determine if existing data cell exists
     if (!(ValueCell->DataLength & CM_KEY_VALUE_SPECIAL_SIZE) &&
-         (ValueCell->DataLength & ~CM_KEY_VALUE_SPECIAL_SIZE) != 0)
+        (ValueCell->DataLength & ~CM_KEY_VALUE_SPECIAL_SIZE) != 0)
     {
         DataCell = HvGetCell(Hive, ValueCell->Data);
         if (!DataCell)
-            return ERROR_GEN_FAILURE;
-
+            goto Quit;
         DataCellSize = (ULONG)(-HvGetCellSize(Hive, DataCell));
     }
     else
     {
-        DataCell = NULL;
+        DataCell = nullptr;
         DataCellSize = 0;
     }
 
@@ -210,7 +214,13 @@ NTRegSetValueExW(
     {
         DPRINT("ValueCell->DataLength %u\n", ValueCell->DataLength);
         if (DataCell)
+        {
+            // Free the old data cell; we'll store data inline
             HvFreeCell(Hive, ValueCell->Data);
+            // No need to release DataCell separately because HvFreeCell deletes the cell;
+            // we still hold a reference, so clear it.
+            DataCell = nullptr;
+        }
 
         RtlCopyMemory(&ValueCell->Data, lpData, cbData);
         ValueCell->DataLength = (cbData | CM_KEY_VALUE_SPECIAL_SIZE);
@@ -220,22 +230,23 @@ NTRegSetValueExW(
     {
         if (cbData > DataCellSize)
         {
-            HCELL_INDEX NewOffset;
-
-            DPRINT("ValueCell->DataLength %u\n", ValueCell->DataLength);
-
             NewOffset = HvAllocateCell(Hive, cbData, Stable, HCELL_NIL);
             if (NewOffset == HCELL_NIL)
             {
-                DPRINT("HvAllocateCell() has failed!\n");
-                return ERROR_GEN_FAILURE;
+                rc = ERROR_GEN_FAILURE;
+                goto Quit;
             }
 
             if (DataCell)
                 HvFreeCell(Hive, ValueCell->Data);
 
             ValueCell->Data = NewOffset;
-            DataCell = static_cast<void*>(HvGetCell(Hive, NewOffset));
+            DataCell = HvGetCell(Hive, NewOffset);
+            if (!DataCell)
+            {
+                rc = ERROR_GEN_FAILURE;
+                goto Quit;
+            }
         }
 
         RtlCopyMemory(DataCell, lpData, cbData);
@@ -254,9 +265,20 @@ NTRegSetValueExW(
 
     KeQuerySystemTime(&KeyNode->LastWriteTime);
 
-    HvReleaseCell(Hive, Key->KeyCellOffset);
+    rc = ERROR_SUCCESS;
 
-    return ERROR_SUCCESS;
+Quit:
+    if (ValueCell && CellIndex != HCELL_NIL)
+        HvReleaseCell(Hive, CellIndex);
+    if (KeyNode)
+        HvReleaseCell(Hive, Key->KeyCellOffset);
+    // Release DataCell if we still hold a reference
+    if (DataCell && ValueCell && ValueCell->Data != HCELL_NIL)
+    {
+        HvReleaseCell(Hive, ValueCell->Data);
+    }
+
+    return rc;
 }
 
 LONG
@@ -284,7 +306,10 @@ NTRegQueryValueExW(
     RtlInitUnicodeString(&ValueNameString, lpValueName);
     CellIndex = CmpFindValueByName(Hive, KeyNode, &ValueNameString);
     if (CellIndex == HCELL_NIL)
+    {
+        HvReleaseCell(Hive, ParentKey->KeyCellOffset);
         return ERROR_FILE_NOT_FOUND;
+    }
 
     ValueCell = reinterpret_cast<PCM_KEY_VALUE>(HvGetCell(Hive, CellIndex));
     ASSERT(ValueCell != NULL);
@@ -292,6 +317,7 @@ NTRegQueryValueExW(
     RepGetValueData(Hive, ValueCell, lpType, lpData, lpcbData);
 
     HvReleaseCell(Hive, CellIndex);
+    HvReleaseCell(Hive, ParentKey->KeyCellOffset);
 
     return ERROR_SUCCESS;
 }
@@ -306,7 +332,7 @@ NTRegDeleteValueW(
     PMEMKEY Key = REGHKEY_TO_MEMKEY(hKey);
     PHHIVE Hive = &Key->RegistryHive->Hive;
     PCM_KEY_NODE KeyNode;
-    PCM_KEY_VALUE ValueCell;
+    PCM_KEY_VALUE ValueCell = nullptr;
     HCELL_INDEX CellIndex;
     ULONG ChildIndex;
     UNICODE_STRING ValueNameString;

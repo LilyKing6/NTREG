@@ -154,10 +154,10 @@ NTRegEnumKey(
     {
         DPRINT("NTRegEnumKey index out of bounds (%d) in key (%.*s)\n",
               Index, KeyNode->NameLength, KeyNode->Name);
-        HvReleaseCell(Hive, REGHKEY_TO_HCI(Key));
+        HvReleaseCell(Hive, ParentKey->KeyCellOffset);
         return ERROR_NO_MORE_ITEMS;
     }
-    HvReleaseCell(Hive, REGHKEY_TO_HCI(Key));
+    HvReleaseCell(Hive, ParentKey->KeyCellOffset);
 
     SubKeyNode = reinterpret_cast<PCM_KEY_NODE>(HvGetCell(Hive, CellIndex));
     ASSERT(SubKeyNode != NULL);
