@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(RegistryLib CXX)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Unit tests infrastructure
+add_library(reg_unit_tests INTERFACE)
 
 # C++20 standard
 set(CMAKE_CXX_STANDARD 20)
@@ -45,6 +49,12 @@ set(TEST_FILELOAD_SOURCE tools/test_fileload.cpp)
 add_library(reg STATIC ${REG_SOURCES})
 target_include_directories(reg PUBLIC include/)
 
+find_package(Criterion REQUIRED)
+find_package(Threads REQUIRED)
+
+# Prepare reg_unit_tests target for test suites
+target_link_libraries(reg_unit_tests INTERFACE reg Criterion::criterion Threads::Threads)
+
 # Performance optimization flags
 if(MSVC)
     target_compile_options(reg PRIVATE /O2 /GL /W4)
@@ -62,6 +72,9 @@ target_link_libraries(mkhive reg kernel32 ws2_32 uuid)
 
 add_executable(regexplorer ${REGEXPLORER_SOURCE})
 target_link_libraries(regexplorer reg kernel32 ws2_32 uuid)
+
+# Register tests/unit subdirectory so unit tests are available
+add_subdirectory(tests/unit)
 
 add_executable(test_api ${TEST_API_SOURCE})
 target_link_libraries(test_api reg kernel32 ws2_32 uuid)

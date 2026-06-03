@@ -1,0 +1,14 @@
+# Base config for registry unit tests
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# reg_unit_tests provides common test lib and links reg
+add_library(reg_unit_tests INTERFACE)
+
+find_package(Criterion REQUIRED)
+find_package(Threads REQUIRED)
+
+# Expose public headers for test apps
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(reg_unit_tests INTERFACE reg Criterion::criterion Threads::Threads)

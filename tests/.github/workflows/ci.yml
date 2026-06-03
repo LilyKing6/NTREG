@@ -1,0 +1,77 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - "**.md"
+      - ".vscode/**"
+      - "docs/**"
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - "**.md"
+      - ".vscode/**"
+      - "docs/**"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: "Build and Test (${{ matrix.os }}, ${{ matrix.cxx }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+            generator: Ninja
+          - os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+            generator: Unix Makefiles
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install toolchain"
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            ${{ matrix.cc }}
+
+      - name: "Install Criterion"
+        run: |
+          sudo apt-get install -y libcriterion-dev || \
+          (mkdir -p /tmp/criterion && git clone --depth=1 https://github.com/Snaipe/Criterion && \
+           cd Criterion && meson setup build && sudo meson install -C build)
+
+      - name: "Configure CMake (${{ matrix.generator }})"
+        run: |
+          mkdir -p build && cd build
+          cmake -G "${{ matrix.generator }}" -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: "Build"
+        run: |
+          cmake --build build -j $(nproc)
+          cmake --build build --target all_cli_tests
+
+      - name: "Run unit tests"
+        run: |
+          cd build
+          ctest --output-on-failure
+
+      - name: "List executable targets"
+        run: |
+          find build -maxdepth 2 -type f -executable -printf "%p\n"
+
+      - name: "Try running a sample unit test (example)"
+        run: |
+          ./build/cm_value_adv_tests || echo "criterion reports failure (expected on matrix mismatch)"
