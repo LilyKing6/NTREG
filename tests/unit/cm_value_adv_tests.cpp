@@ -25,8 +25,12 @@ Test(Value, Qword) {
 }
 
 Test(Value, Link) {
-  // Link support is not yet implemented in the backend - skip complex test
-  cr_assert(true);
+  auto key = registry::Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\VLinkTest");
+  key.set_link(u"LinkVal", u"\\NTReg\\Local\\SYSTEM\\Target");
+  auto val = key.get_link(u"LinkVal");
+  cr_assert(val.has_value());
+  cr_assert_eq(*val, std::u16string(u"\\NTReg\\Local\\SYSTEM\\Target"));
+  key.close();
 }
 
 Test(Value, OverwriteTypes) {
@@ -95,8 +99,13 @@ Test(Value, QwordZeroLarge) {
 }
 
 Test(Value, LinkRoundtrip) {
-  // Link support is not yet implemented in the backend - skip
-  cr_assert(true);
+  auto key = registry::Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\VLinkRT");
+  key.set_link(u"From", u"\\NTReg\\Local\\SYSTEM\\VLinkRT");
+  key.set_link(u"From", u"\\NTReg\\Local\\SYSTEM\\Elsewhere");
+  auto val = key.get_link(u"From");
+  cr_assert(val.has_value());
+  cr_assert_eq(*val, std::u16string(u"\\NTReg\\Local\\SYSTEM\\Elsewhere"));
+  key.close();
 }
 
 Test(Value, LargeMultiString) {

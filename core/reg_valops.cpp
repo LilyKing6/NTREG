@@ -131,23 +131,12 @@ NTRegSetValueExW(
     ULONG DataCellSize = 0;
     LONG rc = ERROR_GEN_FAILURE;  // assume failure
 
+    // REG_LINK values are stored as plain strings like REG_SZ;
+    // the reparse-point infrastructure (CmiReparsePointsHead) handles
+    // link resolution at traversal time in reg_path.cpp.
     if (dwType == REG_LINK)
     {
-        PMEMKEY DestKey;
-
-        if (cbData != sizeof(void*))
-            return ERROR_INVALID_PARAMETER;
-
-        DestKey = REGHKEY_TO_MEMKEY(*reinterpret_cast<PREGHKEY>(const_cast<unsigned char*>(lpData)));
-
-        if (!DestKey || !DestKey->RegistryHive || DestKey->KeyCellOffset == HCELL_NIL)
-            return ERROR_INVALID_PARAMETER;
-
-        if (Key->RegistryHive != DestKey->RegistryHive)
-            return ERROR_SUCCESS;
-
-        DPRINT1("Save link to registry\n");
-        return ERROR_INVALID_FUNCTION;
+        // fall through to normal string storage below
     }
 
     if ((cbData & ~CM_KEY_VALUE_SPECIAL_SIZE) != cbData)

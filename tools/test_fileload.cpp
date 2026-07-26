@@ -47,7 +47,10 @@ int main() {
         rc = reg->EnumKey(hKey, index++, name, &nameSize, nullptr);
         if (rc != ERROR_SUCCESS) break;
         keyCount++;
-        std::cout << "  Subkey: " << static_cast<const char*>(static_cast<const void*>(name)) << "\n";
+        std::string narrow_name;
+        for (WCHAR* p = name; *p; ++p)
+            narrow_name.push_back(static_cast<char>(*p & 0x7F));
+        std::cout << "  Subkey: " << narrow_name << "\n";
     }
 
     reg->CloseKey(hKey);
