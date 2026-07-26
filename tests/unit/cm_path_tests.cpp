@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(Path, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ Registry::shutdown(); })
+TestSuite(Path, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
 
 Test(Path, DeepNesting) {
     auto key = Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\P1");

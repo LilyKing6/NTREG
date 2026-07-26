@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(Core, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ Registry::shutdown(); })
+TestSuite(Core, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
 
 Test(Core, KeyNativeHandle) {
     auto key = Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\CoreNH");
