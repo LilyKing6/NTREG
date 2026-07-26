@@ -19,7 +19,7 @@
 #define MAX_INF_STRING_LENGTH 4096
 
 struct InfLine {
-    std::vector<std::wstring> fields;
+    std::vector<std::u16string> fields;
 };
 
 struct InfSection {
@@ -27,45 +27,45 @@ struct InfSection {
 };
 
 struct InfFile {
-    std::map<std::wstring, InfSection> sections;
+    std::map<std::u16string, InfSection> sections;
 };
 
 struct InfContext {
     InfFile* file;
-    std::wstring section;
+    std::u16string section;
     size_t line_index;
 };
 
 using HINF = InfFile*;
 using PINFCONTEXT = InfContext*;
 
-inline std::wstring trim(const std::wstring& str) {
+inline std::u16string trim(const std::u16string& str) {
     size_t start = 0, end = str.length();
-    while (start < end && (str[start] == L' ' || str[start] == L'\t')) start++;
-    while (end > start && (str[end-1] == L' ' || str[end-1] == L'\t' || str[end-1] == L'\r' || str[end-1] == L'\n')) end--;
+    while (start < end && (str[start] == u' ' || str[start] == u'\t')) start++;
+    while (end > start && (str[end-1] == u' ' || str[end-1] == u'\t' || str[end-1] == u'\r' || str[end-1] == u'\n')) end--;
     return str.substr(start, end - start);
 }
 
-inline std::wstring parse_field(const std::wstring& str, size_t& pos) {
-    std::wstring result;
-    while (pos < str.length() && (str[pos] == L' ' || str[pos] == L'\t')) pos++;
+inline std::u16string parse_field(const std::u16string& str, size_t& pos) {
+    std::u16string result;
+    while (pos < str.length() && (str[pos] == u' ' || str[pos] == u'\t')) pos++;
     if (pos >= str.length()) return result;
 
-    if (str[pos] == L'"') {
+    if (str[pos] == u'"') {
         pos++;
-        while (pos < str.length() && str[pos] != L'"') {
+        while (pos < str.length() && str[pos] != u'"') {
             result += str[pos++];
         }
         if (pos < str.length()) pos++;
     } else {
-        while (pos < str.length() && str[pos] != L',' && str[pos] != L';') {
+        while (pos < str.length() && str[pos] != u',' && str[pos] != u';') {
             result += str[pos++];
         }
         result = trim(result);
     }
 
-    while (pos < str.length() && (str[pos] == L' ' || str[pos] == L'\t')) pos++;
-    if (pos < str.length() && str[pos] == L',') pos++;
+    while (pos < str.length() && (str[pos] == u' ' || str[pos] == u'\t')) pos++;
+    if (pos < str.length() && str[pos] == u',') pos++;
 
     return result;
 }
@@ -75,23 +75,23 @@ inline int InfHostOpenFile(HINF* InfHandle, const char* FileName, ULONG, ULONG*)
     if (!file.is_open()) return -1;
 
     InfFile* inf = new InfFile();
-    std::wstring current_section;
+    std::u16string current_section;
     std::string line;
 
     while (std::getline(file, line)) {
-        std::wstring wline(line.begin(), line.end());
+        std::u16string wline(line.begin(), line.end());
         wline = trim(wline);
 
-        if (wline.empty() || wline[0] == L';') continue;
+        if (wline.empty() || wline[0] == u';') continue;
 
-        if (wline[0] == L'[' && wline.back() == L']') {
+        if (wline[0] == u'[' && wline.back() == u']') {
             current_section = wline.substr(1, wline.length() - 2);
             inf->sections[current_section] = InfSection();
         } else if (!current_section.empty()) {
             InfLine inf_line;
             size_t pos = 0;
-            while (pos < wline.length() && wline[pos] != L';') {
-                std::wstring field = parse_field(wline, pos);
+            while (pos < wline.length() && wline[pos] != u';') {
+                std::u16string field = parse_field(wline, pos);
                 if (!field.empty() || inf_line.fields.size() > 0) {
                     inf_line.fields.push_back(field);
                 }
@@ -109,7 +109,7 @@ inline int InfHostOpenFile(HINF* InfHandle, const char* FileName, ULONG, ULONG*)
 inline int InfHostFindFirstLine(HINF hInf, const WCHAR* Section, const WCHAR*, PINFCONTEXT* Context) {
     if (!hInf || !Section) return -1;
 
-    std::wstring sec(Section);
+    std::u16string sec(Section);
     if (hInf->sections.find(sec) == hInf->sections.end()) return -1;
     if (hInf->sections[sec].lines.empty()) return -1;
 
@@ -139,11 +139,12 @@ inline int InfHostGetStringField(PINFCONTEXT Context, ULONG FieldIndex, WCHAR* B
     auto& line = Context->file->sections[Context->section].lines[Context->line_index];
     if (FieldIndex == 0 || FieldIndex > line.fields.size()) return -1;
 
-    const std::wstring& field = line.fields[FieldIndex - 1];
+    const std::u16string& field = line.fields[FieldIndex - 1];
     if (RequiredSize) *RequiredSize = field.length() + 1;
 
     if (Buffer && BufferSize > 0) {
-        wcsncpy(Buffer, field.c_str(), BufferSize - 1);
+        size_t copy_len = (field.length() < BufferSize - 1) ? field.length() : BufferSize - 1;
+        RtlCopyMemory(Buffer, field.c_str(), copy_len * sizeof(WCHAR));
         Buffer[BufferSize - 1] = 0;
     }
     return 0;
@@ -155,8 +156,12 @@ inline int InfHostGetIntField(PINFCONTEXT Context, ULONG FieldIndex, INT* Value)
     auto& line = Context->file->sections[Context->section].lines[Context->line_index];
     if (FieldIndex == 0 || FieldIndex > line.fields.size()) return -1;
 
-    const std::wstring& field = line.fields[FieldIndex - 1];
-    *Value = wcstol(field.c_str(), nullptr, 0);
+    const std::u16string& field = line.fields[FieldIndex - 1];
+    // Parse integer from char16_t string (ASCII-compatible)
+    {
+        std::string narrow(field.begin(), field.end());
+        *Value = static_cast<INT>(std::strtol(narrow.c_str(), nullptr, 0));
+    }
     return 0;
 }
 
@@ -177,8 +182,9 @@ inline int InfHostGetBinaryField(PINFCONTEXT Context, ULONG FieldIndex, unsigned
 
     std::vector<unsigned char> data;
     for (size_t i = FieldIndex - 1; i < line.fields.size(); i++) {
-        const std::wstring& field = line.fields[i];
-        unsigned long val = wcstoul(field.c_str(), nullptr, 16);
+        const std::u16string& field = line.fields[i];
+        std::string narrow(field.begin(), field.end());
+        unsigned long val = std::strtoul(narrow.c_str(), nullptr, 16);
         data.push_back(static_cast<unsigned char>(val));
     }
 

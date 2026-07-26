@@ -18,7 +18,7 @@ using registry::Registry;
 using registry::ValueType;
 
 static Key currentKey = Key(nullptr, false);
-static std::wstring currentPath = L"\\NTReg\\Local";
+static std::u16string currentPath = u"\\NTReg\\Local";
 
 void printHelp() {
     std::cout << "Commands:\n";
@@ -32,15 +32,22 @@ void printHelp() {
     std::cout << "  exit            - Exit\n";
 }
 
+static std::string u16_to_narrow(const std::u16string& s) {
+    std::string result;
+    result.reserve(s.size());
+    for (char16_t c : s) result.push_back(static_cast<char>(c & 0x7F));
+    return result;
+}
+
 void ls() {
     std::cout << "\nSubkeys:\n";
-    currentKey.enum_keys([](std::wstring_view name) -> bool {
-        std::wcout << L"  [" << name << L"]\n";
+    currentKey.enum_keys([](std::u16string_view name) -> bool {
+        std::cout << "  [" << u16_to_narrow(std::u16string(name)) << "]\n";
         return true;
     });
 
     std::cout << "\nValues:\n";
-    currentKey.enum_values([](std::wstring_view name, ValueType type, registry::usize size) -> bool {
+    currentKey.enum_values([](std::u16string_view name, ValueType type, registry::usize size) -> bool {
         const char* typeName = "?";
         switch (type) {
             case ValueType::String:    typeName = "REG_SZ"; break;
@@ -50,26 +57,26 @@ void ls() {
             case ValueType::Qword:     typeName = "REG_QWORD"; break;
             default: break;
         }
-        std::wcout << L"  " << name << L" (" << typeName << ", size=" << size << ")\n";
+        std::cout << "  " << u16_to_narrow(std::u16string(name)) << " (" << typeName << ", size=" << size << ")\n";
         return true;
     });
 }
 
-void cd(const std::wstring& path) {
+void cd(const std::u16string& path) {
     try {
-        std::wstring fullPath;
-        if (path == L"..") {
-            size_t pos = currentPath.rfind(L'\\');
-            if (pos != std::wstring::npos && pos > 0) {
+        std::u16string fullPath;
+        if (path == u"..") {
+            size_t pos = currentPath.rfind(u'\\');
+            if (pos != std::u16string::npos && pos > 0) {
                 fullPath = currentPath.substr(0, pos);
             } else {
                 std::cout << "Already at root\n";
                 return;
             }
-        } else if (path[0] == L'\\') {
+        } else if (path[0] == u'\\') {
             fullPath = path;
         } else {
-            fullPath = currentPath + L"\\" + path;
+            fullPath = currentPath + u"\\" + path;
         }
 
         auto newKey = Registry::open_key(fullPath);
@@ -80,10 +87,10 @@ void cd(const std::wstring& path) {
     }
 }
 
-void cat(const std::wstring& valueName) {
+void cat(const std::u16string& valueName) {
     auto strVal = currentKey.get_string(valueName);
     if (strVal) {
-        std::wcout << *strVal << L"\n";
+        std::cout << u16_to_narrow(*strVal) << "\n";
         return;
     }
 
@@ -104,7 +111,7 @@ void cat(const std::wstring& valueName) {
     std::cout << "Value not found\n";
 }
 
-void mkdir(const std::wstring& keyName) {
+void mkdir(const std::u16string& keyName) {
     try {
         auto subkey = currentKey.create_subkey(keyName);
         std::cout << "Key created\n";
@@ -113,7 +120,7 @@ void mkdir(const std::wstring& keyName) {
     }
 }
 
-void rm(const std::wstring& name) {
+void rm(const std::u16string& name) {
     try {
         currentKey.delete_subkey(name);
         std::cout << "Deleted key\n";
@@ -127,13 +134,14 @@ void rm(const std::wstring& name) {
     }
 }
 
-void setValue(const std::wstring& name, const std::wstring& typeStr, const std::wstring& data) {
+void setValue(const std::u16string& name, const std::u16string& typeStr, const std::u16string& data) {
     try {
-        if (typeStr == L"sz") {
+        if (typeStr == u"sz") {
             currentKey.set_string(name, data);
             std::cout << "Value set\n";
-        } else if (typeStr == L"dword") {
-            uint32_t val = std::stoul(data);
+        } else if (typeStr == u"dword") {
+            std::string narrow(data.begin(), data.end());
+            uint32_t val = std::stoul(narrow);
             currentKey.set_dword(name, val);
             std::cout << "Value set\n";
         } else {
@@ -144,11 +152,11 @@ void setValue(const std::wstring& name, const std::wstring& typeStr, const std::
     }
 }
 
-static std::wstring to_wstring(const std::string& s) {
-    if (s.empty()) return L"";
-    std::wstring ws(s.size(), L'\0');
+static std::u16string to_wstring(const std::string& s) {
+    if (s.empty()) return u"";
+    std::u16string ws(s.size(), u'\0');
     for (size_t i = 0; i < s.size(); i++)
-        ws[i] = static_cast<wchar_t>(static_cast<unsigned char>(s[i]));
+        ws[i] = static_cast<char16_t>(static_cast<unsigned char>(s[i]));
     return ws;
 }
 
@@ -172,7 +180,7 @@ int main() {
 
     std::string line;
     while (true) {
-        std::wcout << L"\n" << currentPath << L"> ";
+        std::cout << "\n" << u16_to_narrow(currentPath) << "> ";
         if (!std::getline(std::cin, line))
             break;
 
@@ -187,7 +195,7 @@ int main() {
         } else if (cmd == "ls") {
             ls();
         } else if (cmd == "pwd") {
-            std::wcout << currentPath << L"\n";
+            std::cout << u16_to_narrow(currentPath) << "\n";
         } else if (cmd == "cd") {
             std::string path;
             iss >> path;

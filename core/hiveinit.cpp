@@ -145,10 +145,10 @@ HvpAllocBaseBlockAligned(
     {
         /* 释放旧头并重新分配一个新的，总是分页的 */
         Hive->Free(BaseBlock, Hive->BaseBlockAlloc);
-        BaseBlock = reinterpret_cast<PHBASE_BLOCK>(Hive->Allocate(PAGE_SIZE, TRUE, Tag));
+        BaseBlock = reinterpret_cast<PHBASE_BLOCK>(Hive->Allocate(sizeof(HBASE_BLOCK), TRUE, Tag));
         if (!BaseBlock) return NULL;
 
-        Hive->BaseBlockAlloc = PAGE_SIZE;
+        Hive->BaseBlockAlloc = sizeof(HBASE_BLOCK);
     }
 
     return BaseBlock;

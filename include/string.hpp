@@ -12,7 +12,7 @@
 #include <string_view>
 #include <algorithm>
 #include <cctype>
-#include <cwctype>
+
 #include "types.hpp"
 
 namespace registry {
@@ -20,30 +20,30 @@ namespace registry {
 // Modern replacement for UNICODE_STRING with automatic memory management
 class RegistryString {
 private:
-    std::wstring data_;
+    std::u16string data_;
 
 public:
     // Constructors
     constexpr RegistryString() noexcept = default;
 
-    RegistryString(const wchar_t* str) : data_(str ? str : L"") {}
+    RegistryString(const char16_t* str) : data_(str ? str : u"") {}
 
-    RegistryString(std::wstring_view sv) : data_(sv) {}
+    RegistryString(std::u16string_view sv) : data_(sv) {}
 
-    RegistryString(const std::wstring& str) : data_(str) {}
+    RegistryString(const std::u16string& str) : data_(str) {}
 
-    RegistryString(std::wstring&& str) noexcept : data_(std::move(str)) {}
+    RegistryString(std::u16string&& str) noexcept : data_(std::move(str)) {}
 
     // Accessors
-    [[nodiscard]] constexpr std::wstring_view view() const noexcept {
+    [[nodiscard]] constexpr std::u16string_view view() const noexcept {
         return data_;
     }
 
-    [[nodiscard]] constexpr const wchar_t* c_str() const noexcept {
+    [[nodiscard]] constexpr const char16_t* c_str() const noexcept {
         return data_.c_str();
     }
 
-    [[nodiscard]] constexpr const wchar_t* data() const noexcept {
+    [[nodiscard]] constexpr const char16_t* data() const noexcept {
         return data_.data();
     }
 
@@ -69,12 +69,12 @@ public:
     }
 
     // Comparison (case-insensitive for registry keys)
-    [[nodiscard]] i32 compare_insensitive(std::wstring_view other) const noexcept {
+    [[nodiscard]] i32 compare_insensitive(std::u16string_view other) const noexcept {
         const auto len = std::min(data_.size(), other.size());
 
         for (usize i = 0; i < len; ++i) {
-            const auto c1 = ::towupper(data_[i]);
-            const auto c2 = ::towupper(other[i]);
+            const auto c1 = _to_upper_char16(data_[i]);
+            const auto c2 = _to_upper_char16(other[i]);
             if (c1 != c2) {
                 return static_cast<i32>(c1 - c2);
             }
@@ -83,23 +83,23 @@ public:
         return static_cast<i32>(data_.size() - other.size());
     }
 
-    [[nodiscard]] bool equals_insensitive(std::wstring_view other) const noexcept {
+    [[nodiscard]] bool equals_insensitive(std::u16string_view other) const noexcept {
         if (data_.size() != other.size()) {
             return false;
         }
 
         return std::equal(data_.begin(), data_.end(), other.begin(),
-            [](wchar_t a, wchar_t b) {
-                return ::towupper(a) == ::towupper(b);
+            [](char16_t a, char16_t b) {
+                return _to_upper_char16(a) == _to_upper_char16(b);
             });
     }
 
     // Conversion operators
-    [[nodiscard]] operator std::wstring_view() const noexcept {
+    [[nodiscard]] operator std::u16string_view() const noexcept {
         return data_;
     }
 
-    [[nodiscard]] const std::wstring& str() const noexcept {
+    [[nodiscard]] const std::u16string& str() const noexcept {
         return data_;
     }
 
@@ -107,16 +107,16 @@ public:
     [[nodiscard]] auto operator<=>(const RegistryString& other) const noexcept = default;
 
     // String operations
-    [[nodiscard]] bool starts_with(std::wstring_view prefix) const noexcept {
+    [[nodiscard]] bool starts_with(std::u16string_view prefix) const noexcept {
         return data_.starts_with(prefix);
     }
 
-    [[nodiscard]] bool ends_with(std::wstring_view suffix) const noexcept {
+    [[nodiscard]] bool ends_with(std::u16string_view suffix) const noexcept {
         return data_.ends_with(suffix);
     }
 
-    [[nodiscard]] bool contains(std::wstring_view substr) const noexcept {
-        return data_.find(substr) != std::wstring::npos;
+    [[nodiscard]] bool contains(std::u16string_view substr) const noexcept {
+        return data_.find(substr) != std::u16string::npos;
     }
 };
 
@@ -124,12 +124,12 @@ public:
 namespace string_utils {
 
 // Case-insensitive comparison
-[[nodiscard]] inline i32 compare_insensitive(std::wstring_view a, std::wstring_view b) noexcept {
+[[nodiscard]] inline i32 compare_insensitive(std::u16string_view a, std::u16string_view b) noexcept {
     const auto len = std::min(a.size(), b.size());
 
     for (usize i = 0; i < len; ++i) {
-        const auto c1 = ::towupper(a[i]);
-        const auto c2 = ::towupper(b[i]);
+        const auto c1 = _to_upper_char16(a[i]);
+        const auto c2 = _to_upper_char16(b[i]);
         if (c1 != c2) {
             return static_cast<i32>(c1 - c2);
         }
@@ -139,35 +139,35 @@ namespace string_utils {
 }
 
 // Case-insensitive equality
-[[nodiscard]] inline bool equals_insensitive(std::wstring_view a, std::wstring_view b) noexcept {
+[[nodiscard]] inline bool equals_insensitive(std::u16string_view a, std::u16string_view b) noexcept {
     if (a.size() != b.size()) {
         return false;
     }
 
     return std::equal(a.begin(), a.end(), b.begin(),
-        [](wchar_t c1, wchar_t c2) {
-            return ::towupper(c1) == ::towupper(c2);
+        [](char16_t c1, char16_t c2) {
+            return _to_upper_char16(c1) == _to_upper_char16(c2);
         });
 }
 
 // Convert to uppercase
-[[nodiscard]] inline std::wstring to_upper(std::wstring_view str) {
-    std::wstring result;
+[[nodiscard]] inline std::u16string to_upper(std::u16string_view str) {
+    std::u16string result;
     result.reserve(str.size());
 
     std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](wchar_t c) { return ::towupper(c); });
+        [](char16_t c) { return _to_upper_char16(c); });
 
     return result;
 }
 
 // Convert to lowercase
-[[nodiscard]] inline std::wstring to_lower(std::wstring_view str) {
-    std::wstring result;
+[[nodiscard]] inline std::u16string to_lower(std::u16string_view str) {
+    std::u16string result;
     result.reserve(str.size());
 
     std::transform(str.begin(), str.end(), std::back_inserter(result),
-        [](wchar_t c) { return ::towlower(c); });
+        [](char16_t c) { return _to_lower_char16(c); });
 
     return result;
 }

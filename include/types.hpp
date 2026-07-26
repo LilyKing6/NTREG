@@ -101,3 +101,20 @@ inline constexpr usize HSECTOR_COUNT = 8;
 }
 
 } // namespace registry
+
+// char16_t helper functions (registry binary format uses 2-byte characters)
+inline unsigned int _wcs_len_char16(const char16_t* str) {
+    const char16_t* s = str;
+    while (*s) ++s;
+    return static_cast<unsigned int>(s - str);
+}
+inline int _wcs_cmp_char16(const char16_t* a, const char16_t* b) {
+    while (*a && (*a == *b)) { ++a; ++b; }
+    return static_cast<int>(*a) - static_cast<int>(*b);
+}
+inline char16_t _to_upper_char16(char16_t c) {
+    return (c >= u'a' && c <= u'z') ? c - (u'a' - u'A') : c;
+}
+inline char16_t _to_lower_char16(char16_t c) {
+    return (c >= u'A' && c <= u'Z') ? c + (u'a' - u'A') : c;
+}

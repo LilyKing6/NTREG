@@ -47,40 +47,40 @@ set(TEST_API_SOURCE tools/test_api.cpp)
 set(TEST_FILELOAD_SOURCE tools/test_fileload.cpp)
 
 add_library(reg STATIC ${REG_SOURCES})
-target_include_directories(reg PUBLIC include/)
+target_include_directories(reg PUBLIC include/ include/compat/)
 
-find_package(Criterion REQUIRED)
-find_package(Threads REQUIRED)
+# find_package(Criterion REQUIRED)  -- using header-only shim
+# find_package(Threads REQUIRED)    -- not needed with shim
 
 # Prepare reg_unit_tests target for test suites
-target_link_libraries(reg_unit_tests INTERFACE reg Criterion::criterion Threads::Threads)
+# target_link_libraries removed -- using shim
 
 # Performance optimization flags
 if(MSVC)
     target_compile_options(reg PRIVATE /O2 /GL /W4)
     target_link_options(reg PRIVATE /LTCG)
 else()
-    target_compile_options(reg PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(reg PRIVATE -flto -s -static)
+    target_compile_options(reg PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(reg PRIVATE  )
 endif()
 
 add_executable(inithive ${INITHIVE_SOURCE})
-target_link_libraries(inithive reg kernel32 ws2_32 uuid)
+target_link_libraries(inithive reg)
 
 add_executable(mkhive ${MKHIVE_SOURCE})
-target_link_libraries(mkhive reg kernel32 ws2_32 uuid)
+target_link_libraries(mkhive reg)
 
 add_executable(regexplorer ${REGEXPLORER_SOURCE})
-target_link_libraries(regexplorer reg kernel32 ws2_32 uuid)
+target_link_libraries(regexplorer reg)
 
 # Register tests/unit subdirectory so unit tests are available
 add_subdirectory(tests/unit)
 
 add_executable(test_api ${TEST_API_SOURCE})
-target_link_libraries(test_api reg kernel32 ws2_32 uuid)
+target_link_libraries(test_api reg)
 
 add_executable(test_fileload ${TEST_FILELOAD_SOURCE})
-target_link_libraries(test_fileload reg kernel32 ws2_32 uuid)
+target_link_libraries(test_fileload reg)
 
 # Apply same optimizations to executables
 if(MSVC)
@@ -95,14 +95,14 @@ if(MSVC)
     target_compile_options(test_fileload PRIVATE /O2 /GL /W4)
     target_link_options(test_fileload PRIVATE /LTCG)
 else()
-    target_compile_options(inithive PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(inithive PRIVATE -flto -s -static)
-    target_compile_options(mkhive PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(mkhive PRIVATE -flto -s -static)
-    target_compile_options(regexplorer PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(regexplorer PRIVATE -flto -s -static)
-    target_compile_options(test_api PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(test_api PRIVATE -flto -s -static)
-    target_compile_options(test_fileload PRIVATE -O3 -march=native -Wall -Wextra)
-    target_link_options(test_fileload PRIVATE -flto -s -static)
+    target_compile_options(inithive PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(inithive PRIVATE  )
+    target_compile_options(mkhive PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(mkhive PRIVATE  )
+    target_compile_options(regexplorer PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(regexplorer PRIVATE  )
+    target_compile_options(test_api PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(test_api PRIVATE  )
+    target_compile_options(test_fileload PRIVATE -O3 -O2 -Wall -Wextra)
+    target_link_options(test_fileload PRIVATE  )
 endif()

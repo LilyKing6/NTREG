@@ -34,7 +34,7 @@ ConnectRegistry(
     if (!ReparsePoint)
         return FALSE;
 
-    Status = CmiInitializeHive(HiveToConnect, L"$$PROTO.HIV");
+    Status = CmiInitializeHive(HiveToConnect, u"$$PROTO.HIV");
     if (!NT_SUCCESS(Status))
     {
         DPRINT1("CmiInitializeHive() failed with status 0x%08x\n", Status);
@@ -180,7 +180,7 @@ RegInitializeRegistry(
 
     g_ActiveHiveList = HiveList;
 
-    Status = CmiInitializeHive(&RootHive, L"");
+    Status = CmiInitializeHive(&RootHive, u"");
     if (!NT_SUCCESS(Status))
     {
         DPRINT1("CmiInitializeHive() failed with status 0x%08x\n", Status);
@@ -243,16 +243,16 @@ RegInitializeRegistry(
 
 #if 1
     NTRegCreateKeyW(NULL,
-                  L"NTReg\\Local\\SYSTEM\\ControlSet001",
+                  u"NTReg\\Local\\SYSTEM\\ControlSet001",
                   &ControlSetKey);
 
-    CreateSymLink(L"NTReg\\Local\\SYSTEM\\CurrentControlSet",
+    CreateSymLink(u"NTReg\\Local\\SYSTEM\\CurrentControlSet",
                   NULL, ControlSetKey);
 
     NTRegCloseKey(ControlSetKey);
 #endif
     NTRegCreateKeyW(NULL,
-                  L"NTReg\\Local\\TEMP",
+                  u"NTReg\\Local\\TEMP",
                   &TempKey);
 
     NTRegCloseKey(TempKey);
@@ -312,13 +312,13 @@ NTRegConnect()
         return FALSE;
     }
 
-    NTRegOpenKeyW(NULL, L"NTReg", &REGHKEY_ROOT);
-    NTRegOpenKeyW(NULL, L"NTReg\\Local", &REGHKEY_LOCAL);
+    NTRegOpenKeyW(NULL, u"NTReg", &REGHKEY_ROOT);
+    NTRegOpenKeyW(NULL, u"NTReg\\Local", &REGHKEY_LOCAL);
 
-    NTRegOpenKeyW(NULL, L"NTReg\\Local\\SYSTEM", &REGHKEY_SYSTEM);
-    NTRegOpenKeyW(NULL, L"NTReg\\Local\\SOFTWARE", &REGHKEY_SOFTWARE);
+    NTRegOpenKeyW(NULL, u"NTReg\\Local\\SYSTEM", &REGHKEY_SYSTEM);
+    NTRegOpenKeyW(NULL, u"NTReg\\Local\\SOFTWARE", &REGHKEY_SOFTWARE);
 
-    NTRegOpenKeyW(NULL, L"NTReg\\Local\\SYSTEM\\NTSoft\\NTReg\\CurrentVersion", &REGHKEY_CURRENT_VERSION);
+    NTRegOpenKeyW(NULL, u"NTReg\\Local\\SYSTEM\\NTSoft\\NTReg\\CurrentVersion", &REGHKEY_CURRENT_VERSION);
 
     return TRUE;
 }

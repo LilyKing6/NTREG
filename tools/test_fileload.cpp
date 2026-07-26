@@ -30,7 +30,7 @@ int main() {
     }
 
     REGHKEY hKey;
-    LONG rc = reg->OpenKey(nullptr, L"\\NTReg\\Local\\SYSTEM", &hKey);
+    LONG rc = reg->OpenKey(nullptr, u"\\NTReg\\Local\\SYSTEM", &hKey);
     if (rc != ERROR_SUCCESS) {
         std::cerr << "OpenKey SYSTEM failed: " << rc << "\n";
         RegShutdownRegistry();
@@ -47,7 +47,7 @@ int main() {
         rc = reg->EnumKey(hKey, index++, name, &nameSize, nullptr);
         if (rc != ERROR_SUCCESS) break;
         keyCount++;
-        std::wcout << L"  Subkey: " << name << L"\n";
+        std::cout << "  Subkey: " << static_cast<const char*>(static_cast<const void*>(name)) << "\n";
     }
 
     reg->CloseKey(hKey);

@@ -43,10 +43,10 @@ static CMHIVE BcdHive;
 
 HIVE_LIST_ENTRY RegistryHives[] =
 {
-    { "SETUPREG", L"NTReg\\Local\\SYSTEM"     , &SystemHive  , SystemSecurity  , SystemSecuritySize   },
-    { "SYSTEM"  , L"NTReg\\Local\\SYSTEM"     , &SystemHive  , SystemSecurity  , SystemSecuritySize   },
-    { "SOFTWARE", L"NTReg\\Local\\SOFTWARE"   , &SoftwareHive, SoftwareSecurity, SoftwareSecuritySize },
-    { "DEFAULT" , L"NTReg\\User\\.DEFAULT"      , &DefaultHive , SystemSecurity  , SystemSecuritySize   },
+    { "SETUPREG", u"NTReg\\Local\\SYSTEM"     , &SystemHive  , SystemSecurity  , SystemSecuritySize   },
+    { "SYSTEM"  , u"NTReg\\Local\\SYSTEM"     , &SystemHive  , SystemSecurity  , SystemSecuritySize   },
+    { "SOFTWARE", u"NTReg\\Local\\SOFTWARE"   , &SoftwareHive, SoftwareSecurity, SoftwareSecuritySize },
+    { "DEFAULT" , u"NTReg\\User\\.DEFAULT"      , &DefaultHive , SystemSecurity  , SystemSecuritySize   },
 };
 C_ASSERT(_countof(RegistryHives) == MAX_NUMBER_OF_REGISTRY_HIVES);
 

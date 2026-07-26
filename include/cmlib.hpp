@@ -16,7 +16,7 @@
 
 /* C_ASSERT Definition */
 #undef C_ASSERT
-#define C_ASSERT(expr) extern char (*c_assert(void)) [(expr) ? 1 : -1]
+#define C_ASSERT(expr) static_assert((expr), "C_ASSERT: " #expr)
 
 #ifdef _WIN32
 #define strncasecmp _strnicmp
@@ -73,7 +73,7 @@
 #define OBJ_CASE_INSENSITIVE             0x00000040L
 #define USHORT_MAX                       USHRT_MAX
 
-#define OBJ_NAME_PATH_SEPARATOR          ((WCHAR)L'\\')
+#define OBJ_NAME_PATH_SEPARATOR          ((WCHAR)u'\\')
 #define UNICODE_NULL                     ((WCHAR)0)
 
 void 

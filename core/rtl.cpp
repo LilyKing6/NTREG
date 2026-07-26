@@ -331,8 +331,8 @@ unsigned char BitScanReverse(ULONG * const Index, unsigned long Mask)
 
 int strcmpiW(const WCHAR *str1, const WCHAR *str2)
 {
-    while (*str1 && (::towlower(*str1) == ::towlower(*str2))) { str1++; str2++; }
-    return ::towlower(*str1) - ::towlower(*str2);
+    while (*str1 && (_to_lower_char16(*str1) == _to_lower_char16(*str2))) { str1++; str2++; }
+    return _to_lower_char16(*str1) - _to_lower_char16(*str2);
 }
 
 unsigned long int strtoulW(const WCHAR *nptr, WCHAR **endptr, int base)

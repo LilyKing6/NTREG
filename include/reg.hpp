@@ -119,38 +119,38 @@ extern HIVE_LIST_ENTRY RegistryHives[];
 /**
  * @brief 注册表根键路径定义。
  */
-#define  REG_ROOT_KEY			L"\\NTReg"
-#define  REG_MACHINE_KEY		L"\\NTReg\\Local"
+#define  REG_ROOT_KEY			u"\\NTReg"
+#define  REG_MACHINE_KEY		u"\\NTReg\\Local"
 
 /**
  * @brief 注册表硬件键路径定义。
  */
-#define  REG_HARDWARE_KEY		L"\\NTReg\\Local\\HARDWARE"
-#define  REG_SYSTEM_KEY			L"\\NTReg\\Local\\SYSTEM"
-#define  REG_SOFTWARE_KEY		L"\\NTReg\\Local\\SOFTWARE"
-#define  REG_SAM_KEY			L"\\NTReg\\Local\\SAM"
-#define  REG_SEC_KEY			L"\\NTReg\\Local\\SECURITY"
+#define  REG_HARDWARE_KEY		u"\\NTReg\\Local\\HARDWARE"
+#define  REG_SYSTEM_KEY			u"\\NTReg\\Local\\SYSTEM"
+#define  REG_SOFTWARE_KEY		u"\\NTReg\\Local\\SOFTWARE"
+#define  REG_SAM_KEY			u"\\NTReg\\Local\\SAM"
+#define  REG_SEC_KEY			u"\\NTReg\\Local\\SECURITY"
 
 /**
  * @brief 注册表描述键路径定义。
  */
-#define  REG_DESCRIPTION_KEY	L"\\NTReg\\Local\\HARDWARE\\DESCRIPTION"
-#define  REG_DEVICEMAP_KEY		L"\\NTReg\\Local\\HARDWARE\\DEVICEMAP"
-#define  REG_RESOURCEMAP_KEY	L"\\NTReg\\Local\\HARDWARE\\RESOURCEMAP"
-#define  REG_CLASSES_KEY		L"\\NTReg\\Local\\Software\\Classes"
-#define  REG_CURVER_KEY         L"\\NTReg\\Local\\SYSTEM\\NTSoft\\NTReg\\CurrentVersion"
+#define  REG_DESCRIPTION_KEY	u"\\NTReg\\Local\\HARDWARE\\DESCRIPTION"
+#define  REG_DEVICEMAP_KEY		u"\\NTReg\\Local\\HARDWARE\\DEVICEMAP"
+#define  REG_RESOURCEMAP_KEY	u"\\NTReg\\Local\\HARDWARE\\RESOURCEMAP"
+#define  REG_CLASSES_KEY		u"\\NTReg\\Local\\Software\\Classes"
+#define  REG_CURVER_KEY         u"\\NTReg\\Local\\SYSTEM\\NTSoft\\NTReg\\CurrentVersion"
 
 /**
  * @brief 注册表时间炸弹键路径定义。
  */
-#define  REG_TIMEBOMB_KEY		L"\\NTReg\\Local\\SYSTEM\\TimeBomb"
+#define  REG_TIMEBOMB_KEY		u"\\NTReg\\Local\\SYSTEM\\TimeBomb"
 
 /**
  * @brief 注册表用户键路径定义。
  */
-#define  REG_USER_KEY			L"\\NTReg\\User"
-#define  REG_DEFAULT_USER_KEY	L"\\NTReg\\User\\.Default"
-#define  REG_CURRENT_USER_KEY	L"\\NTReg\\User\\CurrentUser"
+#define  REG_USER_KEY			u"\\NTReg\\User"
+#define  REG_DEFAULT_USER_KEY	u"\\NTReg\\User\\.Default"
+#define  REG_CURRENT_USER_KEY	u"\\NTReg\\User\\CurrentUser"
 
 
 /**
@@ -195,7 +195,7 @@ extern HIVE_LIST_ENTRY RegistryHives[];
 // #define STATUS_INVALID_PARAMETER_2       ((int)0xC00000F0)
 // #define STATUS_BUFFER_OVERFLOW           ((int)0x80000005)
 
-#define OBJ_NAME_PATH_SEPARATOR           ((WCHAR)L'\\') ///< 对象名称路径分隔符。
+#define OBJ_NAME_PATH_SEPARATOR           ((WCHAR)u'\\') ///< 对象名称路径分隔符。
 
 /**
  * @brief 计算绝对值。

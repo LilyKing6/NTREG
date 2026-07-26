@@ -11,7 +11,7 @@
 
 namespace registry {
 
-static std::string wide_to_narrow(std::wstring_view ws) {
+static std::string wide_to_narrow(std::u16string_view ws) {
     std::string result;
     result.reserve(ws.size());
     for (auto c : ws)
@@ -58,7 +58,7 @@ void HiveInitializer::initialize_from_inf(const std::vector<HiveConfig>& configs
     RegShutdownRegistry();
 }
 
-void HiveInitializer::load_hive(std::wstring_view hive_name, const std::filesystem::path& hive_path) {
+void HiveInitializer::load_hive(std::u16string_view hive_name, const std::filesystem::path& hive_path) {
     std::string name = wide_to_narrow(hive_name);
 
     // If hive_path has a parent directory, use it as the HivePath search base
@@ -83,7 +83,7 @@ void HiveInitializer::load_hive(std::wstring_view hive_name, const std::filesyst
     }
 }
 
-void HiveInitializer::save_hive(std::wstring_view hive_name, const std::filesystem::path& output_path) {
+void HiveInitializer::save_hive(std::u16string_view hive_name, const std::filesystem::path& output_path) {
     std::string name = wide_to_narrow(hive_name);
     std::string path = output_path.string();
 
@@ -96,13 +96,13 @@ void HiveInitializer::quick_init(const std::filesystem::path& reginit_dir,
     std::vector<HiveConfig> configs;
 
     if (std::filesystem::exists(reginit_dir / "hivesys.inf"))
-        configs.push_back({L"SYSTEM", reginit_dir / "hivesys.inf", output_dir, false});
+        configs.push_back({u"SYSTEM", reginit_dir / "hivesys.inf", output_dir, false});
 
     if (std::filesystem::exists(reginit_dir / "hivesft.inf"))
-        configs.push_back({L"SOFTWARE", reginit_dir / "hivesft.inf", output_dir, false});
+        configs.push_back({u"SOFTWARE", reginit_dir / "hivesft.inf", output_dir, false});
 
     if (std::filesystem::exists(reginit_dir / "hivedef.inf"))
-        configs.push_back({L"DEFAULT", reginit_dir / "hivedef.inf", output_dir, false});
+        configs.push_back({u"DEFAULT", reginit_dir / "hivedef.inf", output_dir, false});
 
     if (configs.empty())
         throw RegistryException(RegistryError::KeyNotFound, "No INF files found");

@@ -13,20 +13,20 @@
 
 void write_version_info() {
     try {
-        auto key = registry::Registry::create_key(L"\\NTReg\\Local\\SYSTEM\\CurrentVersion");
+        auto key = registry::Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\CurrentVersion");
 
         // Product information
-        key.set_string(L"ProductName", L"" SOFTNAME);
-        key.set_string(L"CodeName", L"" CODENAME);
-        key.set_dword(L"MajorVersion", VER_PRODUCTMAJORVERSION);
-        key.set_dword(L"MinorVersion", VER_PRODUCTMINORVERSION);
-        key.set_dword(L"BuildNumber", VER_PRODUCTBUILD);
+        key.set_string(u"ProductName", u"" SOFTNAME);
+        key.set_string(u"CodeName", u"" CODENAME);
+        key.set_dword(u"MajorVersion", VER_PRODUCTMAJORVERSION);
+        key.set_dword(u"MinorVersion", VER_PRODUCTMINORVERSION);
+        key.set_dword(u"BuildNumber", VER_PRODUCTBUILD);
 
         // Platform
-        key.set_string(L"Platform", L"" _PLATFORM);
+        key.set_string(u"Platform", u"" _PLATFORM);
 
         // Install date (current time)
-        key.set_dword(L"InstallDate", static_cast<uint32_t>(std::time(nullptr)));
+        key.set_dword(u"InstallDate", static_cast<uint32_t>(std::time(nullptr)));
 
         std::cout << "Version information written successfully\n";
         std::cout << "  Product: " SOFTNAME " (" CODENAME ")\n";
@@ -64,9 +64,9 @@ int main(int argc, char* argv[]) {
         write_version_info();
 
         // Create test key and value
-        auto test_key = registry::Registry::create_key(L"\\NTReg\\Local\\SYSTEM\\Test");
-        test_key.set_string(L"TestValue", L"Hello from modern C++20!");
-        test_key.set_dword(L"Counter", 42);
+        auto test_key = registry::Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\Test");
+        test_key.set_string(u"TestValue", u"Hello from modern C++20!");
+        test_key.set_dword(u"Counter", 42);
 
         std::cout << "\nTest key created with sample values\n";
         std::cout << "Registry initialization complete!\n";

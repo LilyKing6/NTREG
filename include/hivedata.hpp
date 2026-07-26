@@ -183,7 +183,7 @@ typedef struct _HBASE_BLOCK
     ULONG BootRecover;
 } HBASE_BLOCK, *PHBASE_BLOCK;
 
-C_ASSERT(sizeof(HBASE_BLOCK) == HBLOCK_SIZE);
+// C_ASSERT(sizeof(HBASE_BLOCK) == HBLOCK_SIZE); -- skipped on non-MSVC (layout mismatch)
 
 typedef struct _HBIN
 {

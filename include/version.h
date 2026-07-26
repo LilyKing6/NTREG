@@ -46,11 +46,11 @@
 #define VERSION_SUM    (VER_PRODUCTMAJORVERSION * 1e11 + VER_PRODUCTMINORVERSION * 1e10 + VER_PRODUCTBUILD * 1e5 + VER_PRODUCTBUILD_QFE)
 
 //
-// L"CVS", L"RC1", L"RC2" or L"FINAL"
+// u"CVS", u"RC1", u"RC2" or u"FINAu"
 //
 #define VER_PRODUCTBETA_STR         ""
 
-#define VER_PRODUCTBUILD_TYPE	    L"loong_m5"
+#define VER_PRODUCTBUILD_TYPE	    u"loong_m5"
 
 /* 是RTM版本 */
 // #define IS_RTM

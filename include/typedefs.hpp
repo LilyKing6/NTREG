@@ -77,7 +77,8 @@ using UCHAR = registry::u8;
 using BYTE = registry::u8;
 using USHORT = registry::u16;
 using WORD = registry::u16;
-using WCHAR = wchar_t;
+using WCHAR = char16_t;
+
 using UINT = registry::u32;
 using ULONG = registry::u32;
 using DWORD = registry::u32;
@@ -386,4 +387,3 @@ typedef const UNICODE_STRING *PCUNICODE_STRING;
 #define RTL_H
 
 #endif
-

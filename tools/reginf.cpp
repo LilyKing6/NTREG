@@ -40,12 +40,12 @@
 
 static const WCHAR HKCR[] = {'H','K','C','R',0};
 static const WCHAR HKCU[] = {'H','K','C','U',0};
-static const WCHAR HKLM[] = {'H','K','L','M',0};
+static const WCHAR HKLM[] = {'H','K','u','M',0};
 static const WCHAR HKU[] = {'H','K','U',0};
 
-static const WCHAR HKCRPath[] = {'\\','N','T','R','e','g','\\','L','o','c','a','l','\\','S','O','F','T','W','A','R','E','\\','C','l','a','s','s','e','s','\\',0};
-static const WCHAR HKCUPath[] = {'\\','N','T','R','e','g','\\','U','s','e','r','\\','.','D','E','F','A','U','L','T','\\',0};
-static const WCHAR HKLMPath[] = {'\\','N','T','R','e','g','\\','L','o','c','a','l','\\',0};
+static const WCHAR HKCRPath[] = {'\\','N','T','R','e','g','\\','u','o','c','a','l','\\','S','O','F','T','W','A','R','E','\\','C','l','a','s','s','e','s','\\',0};
+static const WCHAR HKCUPath[] = {'\\','N','T','R','e','g','\\','U','s','e','r','\\','.','D','E','F','A','U','u','T','\\',0};
+static const WCHAR HKLMPath[] = {'\\','N','T','R','e','g','\\','u','o','c','a','l','\\',0};
 static const WCHAR HKUPath[] = {'\\','N','T','R','e','g','\\','U','s','e','r','\\',0};
 
 static const WCHAR AddReg[] = {'A','d','d','R','e','g',0};

@@ -19,7 +19,7 @@ namespace registry {
 
 // Hive initialization configuration
 struct HiveConfig {
-    std::wstring name;              // SYSTEM, SOFTWARE, etc.
+    std::u16string name;              // SYSTEM, SOFTWARE, etc.
     std::filesystem::path inf_file; // Path to INF file
     std::filesystem::path output_dir; // Output directory
     bool uppercase = false;         // Uppercase filename
@@ -32,10 +32,10 @@ public:
     static void initialize_from_inf(const std::vector<HiveConfig>& configs);
 
     // Load existing hive
-    static void load_hive(std::wstring_view hive_name, const std::filesystem::path& hive_path);
+    static void load_hive(std::u16string_view hive_name, const std::filesystem::path& hive_path);
 
     // Save hive to file
-    static void save_hive(std::wstring_view hive_name, const std::filesystem::path& output_path);
+    static void save_hive(std::u16string_view hive_name, const std::filesystem::path& output_path);
 
     // Quick initialization with default settings
     static void quick_init(const std::filesystem::path& reginit_dir,
