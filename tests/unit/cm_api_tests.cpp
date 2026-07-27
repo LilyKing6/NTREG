@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(API, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(API, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(API, OpenKeyRoot) {
     auto key = Registry::open_key(u"\\NTReg\\Local\\SYSTEM");

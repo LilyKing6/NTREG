@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(Index, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(Index, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(Index, ManySubkeysEnum) {
     auto key = Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\IdxMany");

@@ -174,12 +174,36 @@ std::optional<std::u16string> Key::get_link(std::u16string_view name) const {
     return std::nullopt;
 }
 
+std::optional<std::u16string> Key::get_expand_string(std::u16string_view name) const {
+    ensure_initialized();
+    ULONG type, size = 0;
+    if (g_reg->QueryValue(static_cast<REGHKEY>(handle_), name.data(), nullptr,
+                          &type, nullptr, &size) != ERROR_SUCCESS || type != REG_EXPAND_SZ) {
+        return std::nullopt;
+    }
+    std::u16string result(size / sizeof(WCHAR), u'\0');
+    if (g_reg->QueryValue(static_cast<REGHKEY>(handle_), name.data(), nullptr,
+                          &type, reinterpret_cast<unsigned char*>(result.data()), &size) == ERROR_SUCCESS) {
+        result.resize(_wcs_len_char16(result.c_str()));
+        return result;
+    }
+    return std::nullopt;
+}
+
 void Key::set_link(std::u16string_view name, std::u16string_view value) {
     ensure_initialized();
     ULONG size = (value.length() + 1) * sizeof(WCHAR);
     throw_on_error(g_reg->SetValue(static_cast<REGHKEY>(handle_), name.data(), 0, REG_LINK,
                         reinterpret_cast<const unsigned char*>(value.data()), size),
                    "Failed to set LINK value");
+}
+
+void Key::set_expand_string(std::u16string_view name, std::u16string_view value) {
+    ensure_initialized();
+    ULONG size = (value.length() + 1) * sizeof(WCHAR);
+    throw_on_error(g_reg->SetValue(static_cast<REGHKEY>(handle_), name.data(), 0, REG_EXPAND_SZ,
+                        reinterpret_cast<const unsigned char*>(value.data()), size),
+                   "Failed to set EXPAND_SZ value");
 }
 
 void Key::set_dword(std::u16string_view name, u32 value) {

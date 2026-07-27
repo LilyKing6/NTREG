@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(ValueBasic, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(ValueBasic, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(ValueBasic, DwordRoundtrip) {
     auto key = Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\VBDword");

@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(Hive, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(Hive, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(Hive, SYSTEMRootAccessible) {
     auto sys = Registry::open_key(u"\\NTReg\\Local\\SYSTEM");

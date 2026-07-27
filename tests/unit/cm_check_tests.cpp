@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-TestSuite(Check, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(Check, .init=[]{ Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(Check, SetGetConsistency) {
     auto key = Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\CheckSGC");

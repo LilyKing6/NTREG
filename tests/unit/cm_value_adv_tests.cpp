@@ -1,7 +1,7 @@
 // Registry Advanced Value Operations Unit Tests
 #include "common.hpp"
 
-TestSuite(Value, .init=[]{ registry::Registry::initialize("SYSTEM"); }, .fini=[]{ /* skip shutdown; OS reclaims at exit */ })
+TestSuite(Value, .init=[]{ registry::Registry::initialize("SYSTEM"); }, .fini=[]{/* skip shutdown; OS reclaims at exit */})
 
 Test(Value, MultiString) {
   auto key = registry::Registry::create_key(u"\\NTReg\\Local\\SYSTEM\\VMultiTest");

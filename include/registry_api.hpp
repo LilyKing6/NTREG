@@ -57,6 +57,7 @@ public:
     [[nodiscard]] std::optional<std::vector<std::u16string>> get_multi_string(std::u16string_view name) const;
     [[nodiscard]] std::optional<u64> get_qword(std::u16string_view name) const;
     [[nodiscard]] std::optional<std::u16string> get_link(std::u16string_view name) const;
+    [[nodiscard]] std::optional<std::u16string> get_expand_string(std::u16string_view name) const;
 
     void set_dword(std::u16string_view name, u32 value);
     void set_string(std::u16string_view name, std::u16string_view value);
@@ -64,6 +65,7 @@ public:
     void set_multi_string(std::u16string_view name, const std::vector<std::u16string>& value);
     void set_qword(std::u16string_view name, u64 value);
     void set_link(std::u16string_view name, std::u16string_view value);
+    void set_expand_string(std::u16string_view name, std::u16string_view value);
 
     void delete_value(std::u16string_view name);
 
