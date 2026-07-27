@@ -324,6 +324,11 @@ void Registry::shutdown() {
         free(g_reg);
         g_reg = nullptr;
     }
+    REGHKEY_ROOT = nullptr;
+    REGHKEY_LOCAL = nullptr;
+    REGHKEY_SYSTEM = nullptr;
+    REGHKEY_SOFTWARE = nullptr;
+    REGHKEY_CURRENT_VERSION = nullptr;
 }
 
 Key Registry::open_key(std::u16string_view path) {

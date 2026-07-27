@@ -291,7 +291,11 @@ RegShutdownRegistry()
         free(ReparsePoint);
     }
 
-    free(RootKey);
+    if (RootKey)
+    {
+        free(RootKey);
+        RootKey = nullptr;
+    }
 }
 
 BOOLEAN
