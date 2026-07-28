@@ -1,0 +1,56 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test (g++)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++-14]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 cmake
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Generate hive files
+        working-directory: build
+        run: |
+          mkdir -p Config
+          ./mkhive -h:SYSTEM -u -d:Config ../reginit/hivesys.inf
+          ./mkhive -h:SOFTWARE -u -d:Config ../reginit/hivesft.inf
+          ./mkhive -h:DEFAULT -u -d:Config ../reginit/hivedef.inf
+
+      - name: Integration test
+        working-directory: build
+        run: ./test_api
+
+      - name: Unit tests
+        working-directory: build/tests/unit
+        run: |
+          ln -sf ../../Config Config
+          for t in cm_*_tests; do
+            echo "=== $t ==="
+            ./$t
+          done
+
+      - name: Summary
+        run: |
+          echo "All tests completed successfully."
