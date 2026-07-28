@@ -127,13 +127,9 @@ std::string u16_to_narrow(const std::u16string& s) {
 
 ## Known issues
 
-1. **Shutdown double-free** — multi-test suites skip `RegShutdownRegistry` in `.fini` to avoid segfault. `Registry::shutdown` frees `g_reg` after `RegShutdownRegistry`, but hive objects may already be freed internally.
+1. **Shutdown lifecycle** — multi-test suites skip `RegShutdownRegistry` in `.fini` to avoid potential issues. `Registry::shutdown` frees `g_reg` after `RegShutdownRegistry`, but hive objects may already be freed internally. The `init`/`shutdown`/`init` cycle works correctly in standalone tests, but the test framework skips shutdown as a precaution.
 
-2. **REG_LINK write not implemented** — `reg_valops.cpp:150` returns `ERROR_INVALID_FUNCTION` when writing symbolic links. Infrastructure (`CreateSymLink`, `REPARSE_POINT`) exists but is only used at init time.
-
-3. **`test_fileload.cpp`** — subkey names print as pointer addresses (missing `u16_to_narrow` helper).
-
-4. **`regexplorer` interactive tool** — `std::stoul` on `u16string` needs manual conversion; display partially broken.
+2. **Cell free list corruption (mitigated)** — `HvFreeCell` coalescing could produce stale free list entries with incorrect `Size` fields, leading to out-of-bounds writes during `HvAllocateCell` cell splitting. Fixed by adding bin-boundary validation in `HvpFindFree`, `HvAllocateCell`, and `HvFreeCell` (pointer-based bounds checks, corrupted entry skipping, and zero-size cell guards). Verified with ASAN.
 
 ## File map
 

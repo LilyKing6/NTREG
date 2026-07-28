@@ -294,12 +294,51 @@ HvpFindFree(
         pFreeCellOffset = &RegistryHive->Storage[Storage].FreeDisplay[Index];
         while (*pFreeCellOffset != HCELL_NIL)
         {
-            FreeCellData = reinterpret_cast<PHCELL_INDEX>(HvGetCell(RegistryHive, *pFreeCellOffset));
-            if ((ULONG)HvpGetCellFullSize(RegistryHive, FreeCellData) >= Size)
+            /* Validate the cell offset before dereferencing */
+            HCELL_INDEX CurOffset = *pFreeCellOffset;
+            ULONG CurType = HvGetCellType(CurOffset);
+            ULONG CurBlock = HvGetCellBlock(CurOffset);
+            if (CurType > Volatile || CurBlock >= RegistryHive->Storage[CurType].Length ||
+                !RegistryHive->Storage[CurType].BlockList[CurBlock].BlockAddress)
             {
-                FreeCellOffset = *pFreeCellOffset;
-                *pFreeCellOffset = *FreeCellData;
-                return FreeCellOffset;
+                /* Corrupted free list: invalid cell offset. Clear and stop. */
+                *pFreeCellOffset = HCELL_NIL;
+                break;
+            }
+            FreeCellData = reinterpret_cast<PHCELL_INDEX>(HvGetCell(RegistryHive, CurOffset));
+            ULONG CellSize = (ULONG)HvpGetCellFullSize(RegistryHive, FreeCellData);
+            if (CellSize >= Size && CellSize > 0)
+            {
+                /* Validate the cell size against the bin boundary */
+                ULONG FcBlock = HvGetCellBlock(*pFreeCellOffset);
+                HSTORAGE_TYPE FcType = static_cast<HSTORAGE_TYPE>(HvGetCellType(*pFreeCellOffset));
+                BOOLEAN bValid = TRUE;
+                if (FcBlock < RegistryHive->Storage[FcType].Length)
+                {
+                    PHBIN FcBin = reinterpret_cast<PHBIN>(
+                        RegistryHive->Storage[FcType].BlockList[FcBlock].BinAddress);
+                    if (FcBin)
+                    {
+                        ULONG_PTR CellStart = reinterpret_cast<ULONG_PTR>(FreeCellData) - sizeof(HCELL);
+                        ULONG_PTR BinEnd = reinterpret_cast<ULONG_PTR>(FcBin) + FcBin->Size;
+                        if (CellStart + CellSize > BinEnd)
+                            bValid = FALSE;
+                    }
+                }
+                if (bValid)
+                {
+                    FreeCellOffset = *pFreeCellOffset;
+                    *pFreeCellOffset = *FreeCellData;
+                    return FreeCellOffset;
+                }
+                /* Corrupted entry: unlink and advance */
+                HCELL_INDEX NextOffset = *FreeCellData;
+                *pFreeCellOffset = NextOffset;
+                if (NextOffset == HCELL_NIL)
+                    break;
+                pFreeCellOffset = reinterpret_cast<PHCELL_INDEX>(
+                    HvGetCell(RegistryHive, NextOffset));
+                continue;
             }
             pFreeCellOffset = FreeCellData;
         }
@@ -403,12 +442,31 @@ HvAllocateCell(
        a cell that would never be allocated. */
     if ((ULONG)FreeCell->Size > Size + 16)
     {
-        NewCell = reinterpret_cast<PHCELL>(reinterpret_cast<char*>(FreeCell) + Size);
-        NewCell->Size = FreeCell->Size - Size;
-        FreeCell->Size = Size;
-        HvpAddFree(RegistryHive, NewCell, FreeCellOffset + Size);
-        if (Storage == Stable)
-            HvMarkCellDirty(RegistryHive, FreeCellOffset + Size, FALSE);
+        /* Verify the split stays within the bin boundary */
+        ULONG FcBlock = HvGetCellBlock(FreeCellOffset);
+        HSTORAGE_TYPE FcType = static_cast<HSTORAGE_TYPE>(HvGetCellType(FreeCellOffset));
+        BOOLEAN bCanSplit = TRUE;
+        if (FcBlock < RegistryHive->Storage[FcType].Length)
+        {
+            PHBIN FcBin = reinterpret_cast<PHBIN>(
+                RegistryHive->Storage[FcType].BlockList[FcBlock].BinAddress);
+            if (FcBin)
+            {
+                ULONG_PTR SplitPoint = reinterpret_cast<ULONG_PTR>(FreeCell) + Size;
+                ULONG_PTR BinEnd = reinterpret_cast<ULONG_PTR>(FcBin) + FcBin->Size;
+                if (SplitPoint + sizeof(HCELL) > BinEnd)
+                    bCanSplit = FALSE;
+            }
+        }
+        if (bCanSplit)
+        {
+            NewCell = reinterpret_cast<PHCELL>(reinterpret_cast<char*>(FreeCell) + Size);
+            NewCell->Size = FreeCell->Size - Size;
+            FreeCell->Size = Size;
+            HvpAddFree(RegistryHive, NewCell, FreeCellOffset + Size);
+            if (Storage == Stable)
+                HvMarkCellDirty(RegistryHive, FreeCellOffset + Size, FALSE);
+        }
     }
 
     if (Storage == Stable)
@@ -505,22 +563,32 @@ HvFreeCell(
     /* FIXME: Merge free blocks */
     Bin = reinterpret_cast<PHBIN>(RegistryHive->Storage[CellType].BlockList[CellBlock].BinAddress);
 
-    if ((CellIndex & ~HCELL_TYPE_MASK) + Free->Size <
-        Bin->FileOffset + Bin->Size)
+    /* Forward merge using pointer-based bin boundary check */
     {
-        Neighbor = reinterpret_cast<PHCELL>(reinterpret_cast<char*>(Free) + Free->Size);
-        if (Neighbor->Size > 0)
+        ULONG_PTR FreeEnd = reinterpret_cast<ULONG_PTR>(Free) + Free->Size;
+        ULONG_PTR BinEnd = reinterpret_cast<ULONG_PTR>(Bin) + Bin->Size;
+        if (FreeEnd < BinEnd)
         {
-            HvpRemoveFree(RegistryHive, Neighbor,
-                          (static_cast<HCELL_INDEX>(reinterpret_cast<char*>(Neighbor) - reinterpret_cast<char*>(Bin) +
-                            Bin->FileOffset)) | (CellIndex & HCELL_TYPE_MASK));
-            Free->Size += Neighbor->Size;
+            Neighbor = reinterpret_cast<PHCELL>(reinterpret_cast<char*>(Free) + Free->Size);
+            if (Neighbor->Size > 0)
+            {
+                HCELL_INDEX NeighborCellIndex =
+                    (static_cast<HCELL_INDEX>(reinterpret_cast<char*>(Neighbor) - reinterpret_cast<char*>(Bin) +
+                      Bin->FileOffset)) | (CellIndex & HCELL_TYPE_MASK);
+                HvpRemoveFree(RegistryHive, Neighbor, NeighborCellIndex);
+                Free->Size += Neighbor->Size;
+            }
         }
     }
 
     Neighbor = reinterpret_cast<PHCELL>(Bin + 1);
-    while (Neighbor < Free)
+    ULONG_PTR BwdBinEnd = reinterpret_cast<ULONG_PTR>(Bin) + Bin->Size;
+    while (Neighbor < Free &&
+           reinterpret_cast<ULONG_PTR>(Neighbor) < BwdBinEnd)
     {
+        if (Neighbor->Size == 0)
+            break; /* Safety: prevent infinite loop on corrupted cell */
+
         if (Neighbor->Size > 0)
         {
             if (reinterpret_cast<char*>(Neighbor) + Neighbor->Size == reinterpret_cast<char*>(Free))
