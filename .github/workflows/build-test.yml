@@ -44,12 +44,7 @@ jobs:
 
       - name: Unit tests
         working-directory: build/tests/unit
-        run: |
-          ln -sf ../../Config Config
-          for t in cm_*_tests; do
-            echo "=== $t ==="
-            ./$t
-          done
+        run: ./run_tests.sh
 
       - name: Summary
         run: |

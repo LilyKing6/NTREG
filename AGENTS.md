@@ -24,7 +24,18 @@ mkdir -p Config
 
 **Integration:** `build/test_api` — 13 cases covering create/open/delete keys, set/get string/dword/binary, enumerate keys/values, subkey operations.
 
+```bash
+cd build && ./test_api
+```
+
 **Unit tests (8 executables):**
+
+```bash
+cd build/tests/unit
+./run_tests.sh          # regenerates hives, runs all suites
+```
+
+Or manually:
 
 ```bash
 cd build/tests/unit
